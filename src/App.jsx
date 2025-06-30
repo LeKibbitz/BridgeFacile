@@ -811,14 +811,17 @@ function App() {
                         </div>
                       </div>
                       <div className="flex justify-between mt-6">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))}
-                          disabled={activeSlide === 0}
-                        >
-                          <ChevronLeft className="w-4 h-4 mr-2" />
-                          Précédent
-                        </Button>
+                        {activeSlide === 0 ? (
+                          <div></div>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))}
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-2" />
+                            Précédent
+                          </Button>
+                        )}
                         <span className="flex items-center text-sm text-gray-600">
                           {activeSlide + 1} / {slides.length}
                         </span>
