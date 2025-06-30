@@ -247,8 +247,8 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[10000]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">
@@ -552,7 +552,7 @@ function AuthWidget() {
         </button>
 
         {showUserMenu && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
             <div className="py-1">
               <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                 <div className="font-medium">{user.user_metadata?.first_name} {user.user_metadata?.last_name}</div>
@@ -709,8 +709,8 @@ function ContactModal({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[10000]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold text-gray-800">Contactez-nous</h3>
           <button
@@ -1463,7 +1463,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-40">
+      <header className="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
