@@ -10,6 +10,8 @@ import {
   Star, 
   Play, 
   ChevronRight, 
+  ChevronLeft,
+  Home,
   Mail, 
   Phone,
   Clock,
@@ -806,15 +808,6 @@ function App() {
                           <p className="text-lg">
                             Contenu de la diapositive {index + 1} - {slide.title}
                           </p>
-                          
-                          {index >= completedModules && (
-                            <Button 
-                              onClick={() => handleSlideComplete(index)}
-                              className="mt-6 bg-white text-green-800 hover:bg-gray-100"
-                            >
-                              Marquer comme terminé
-                            </Button>
-                          )}
                         </div>
                       </div>
                       <div className="flex justify-between mt-6">
@@ -823,18 +816,34 @@ function App() {
                           onClick={() => setActiveSlide(Math.max(0, activeSlide - 1))}
                           disabled={activeSlide === 0}
                         >
+                          <ChevronLeft className="w-4 h-4 mr-2" />
                           Précédent
                         </Button>
                         <span className="flex items-center text-sm text-gray-600">
                           {activeSlide + 1} / {slides.length}
                         </span>
-                        <Button 
-                          onClick={() => setActiveSlide(Math.min(slides.length - 1, activeSlide + 1))}
-                          disabled={activeSlide === slides.length - 1}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          Suivant
-                        </Button>
+                        {activeSlide === slides.length - 1 ? (
+                          <Button 
+                            onClick={() => {
+                              const accueilSection = document.getElementById('accueil');
+                              if (accueilSection) {
+                                accueilSection.scrollIntoView({ behavior: 'smooth' });
+                              }
+                            }}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Home className="w-4 h-4 mr-2" />
+                            Retour à l'accueil
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => setActiveSlide(Math.min(slides.length - 1, activeSlide + 1))}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            Suivant
+                            <ChevronRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
