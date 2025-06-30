@@ -26,7 +26,11 @@ import {
   Video,
   Calendar,
   CheckCircle,
-  BarChart3
+  BarChart3,
+  Send,
+  Minimize2,
+  Maximize2,
+  User
 } from 'lucide-react'
 import './App.css'
 
@@ -290,6 +294,174 @@ function ProgressBar({ progress, total }) {
         <span>Progression</span>
         <span>{progress}/{total} modules ({Math.round(percentage)}%)</span>
       </div>
+    </div>
+  )
+}
+
+// Floating Chat Component
+function FloatingChat() {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      user: 'Thomas',
+      category: 'Professeur',
+      message: 'Bienvenue ! N\'hésitez pas à poser vos questions.',
+      timestamp: new Date(Date.now() - 300000),
+      isAdmin: true
+    },
+    {
+      id: 2,
+      user: 'Marie_D',
+      category: 'Cours Live',
+      message: 'Merci pour le cours d\'aujourd\'hui !',
+      timestamp: new Date(Date.now() - 120000),
+      isAdmin: false
+    }
+  ])
+  const [newMessage, setNewMessage] = useState('')
+  const [userInfo, setUserInfo] = useState({
+    pseudo: 'Visiteur',
+    category: 'Prospect'
+  })
+
+  const userCategories = [
+    'Prospect',
+    'Cours Live - Débutant',
+    'Cours Live - Intermédiaire', 
+    'Cours Autonome',
+    'Cours Particulier'
+  ]
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      const message = {
+        id: messages.length + 1,
+        user: userInfo.pseudo,
+        category: userInfo.category,
+        message: newMessage,
+        timestamp: new Date(),
+        isAdmin: false
+      }
+      setMessages([...messages, message])
+      setNewMessage('')
+    }
+  }
+
+  const formatTime = (timestamp) => {
+    return timestamp.toLocaleTimeString('fr-FR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  const getCategoryColor = (category) => {
+    if (category === 'Professeur') return 'bg-green-100 text-green-800'
+    if (category.includes('Live')) return 'bg-blue-100 text-blue-800'
+    if (category.includes('Autonome')) return 'bg-emerald-100 text-emerald-800'
+    if (category.includes('Particulier')) return 'bg-purple-100 text-purple-800'
+    return 'bg-gray-100 text-gray-800'
+  }
+
+  return (
+    <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50">
+      {/* Collapsed State */}
+      {!isExpanded && (
+        <div 
+          onClick={() => setIsExpanded(true)}
+          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-110"
+        >
+          <MessageCircle className="w-6 h-6" />
+          <div className="absolute -left-20 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
+            Chat Support
+          </div>
+        </div>
+      )}
+
+      {/* Expanded State */}
+      {isExpanded && (
+        <div className="bg-white rounded-lg shadow-2xl w-80 h-96 flex flex-col border border-gray-200 animate-in slide-in-from-right duration-300">
+          {/* Header */}
+          <div className="bg-green-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <div>
+              <h3 className="font-semibold">Chat BridgeFacile</h3>
+              <p className="text-xs text-green-100">Support en ligne</p>
+            </div>
+            <button 
+              onClick={() => setIsExpanded(false)}
+              className="hover:bg-green-700 p-1 rounded"
+            >
+              <Minimize2 className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* User Info */}
+          <div className="p-3 bg-gray-50 border-b">
+            <div className="flex items-center space-x-2 mb-2">
+              <User className="w-4 h-4 text-gray-600" />
+              <input
+                type="text"
+                value={userInfo.pseudo}
+                onChange={(e) => setUserInfo({...userInfo, pseudo: e.target.value})}
+                className="text-sm border rounded px-2 py-1 flex-1"
+                placeholder="Votre pseudo"
+              />
+            </div>
+            <select
+              value={userInfo.category}
+              onChange={(e) => setUserInfo({...userInfo, category: e.target.value})}
+              className="text-xs border rounded px-2 py-1 w-full"
+            >
+              {userCategories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {messages.map(msg => (
+              <div key={msg.id} className={`${msg.isAdmin ? 'text-right' : 'text-left'}`}>
+                <div className={`inline-block max-w-[80%] p-2 rounded-lg ${
+                  msg.isAdmin 
+                    ? 'bg-green-100 text-green-900' 
+                    : 'bg-gray-100 text-gray-900'
+                }`}>
+                  <div className="flex items-center space-x-1 mb-1">
+                    <span className="font-semibold text-xs">{msg.user}</span>
+                    <Badge className={`text-xs px-1 py-0 ${getCategoryColor(msg.category)}`}>
+                      {msg.category}
+                    </Badge>
+                  </div>
+                  <p className="text-sm">{msg.message}</p>
+                  <p className="text-xs text-gray-500 mt-1">{formatTime(msg.timestamp)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="p-3 border-t bg-gray-50">
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Tapez votre message..."
+                className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <Button 
+                onClick={handleSendMessage}
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -652,11 +824,11 @@ function App() {
             <p className="text-xl text-gray-600">Choisissez la formule qui vous correspond</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-start">
             {courseFormulas.map((formula, index) => {
               const IconComponent = formula.icon
               return (
-                <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
                   <CardHeader className="text-center">
                     <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
                       formula.color === 'blue' ? 'bg-blue-100' : 
@@ -681,7 +853,7 @@ function App() {
                       </span>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-1">
                     <p className="text-gray-600 mb-6 text-center">{formula.description}</p>
                     
                     <div className="space-y-3 mb-6">
@@ -954,6 +1126,9 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Chat */}
+      <FloatingChat />
     </div>
   )
 }
