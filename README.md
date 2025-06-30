@@ -1,188 +1,190 @@
-# BridgeFacile - Bridge Learning Platform
+# BridgeFacile 🃏
 
-A comprehensive bridge learning platform built with React and Supabase, offering both live video courses and autonomous learning paths.
+**Plateforme d'apprentissage du Bridge avec cours en ligne et chat communautaire**
 
-## 🚀 Live Demo
+[![React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://reactjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Database-green.svg)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.1.7-blue.svg)](https://tailwindcss.com/)
+[![Vite](https://img.shields.io/badge/Vite-6.3.5-purple.svg)](https://vitejs.dev/)
 
-**Production Website:** https://uvsgjklv.manus.space
+## 🌟 Fonctionnalités
 
-## ✨ Features
+### 🎓 **Système de Cours Complet**
+- **3 formules de cours** : Live Visio, Autonome, Particuliers
+- **Présentation interactive** avec 10 modules progressifs
+- **Navigation intuitive** entre les diapos
+- **Suivi de progression** avec barre de progression
+- **Intégration Trustpilot** pour les avis
 
-### 🎓 Course Offerings
-- **Live Visio Courses**: Interactive group sessions with real-time instruction (€120+)
-- **Autonomous Courses**: Self-paced learning with monthly check-ins (€80+)
+### 🔐 **Authentification Complète**
+- **Inscription/Connexion** avec vérification email
+- **Profils utilisateurs** avec informations bridge spécifiques
+- **Validation des données** (email, téléphone, licence FFB)
+- **Gestion de session** persistante
+- **Sécurité RLS** avec Supabase
 
-### 📋 Contact System
-- Complete contact form with 6 fields:
-  - First Name (Prénom)
-  - Last Name (Nom)
-  - Lucky Pseudonym (Votre pseudo le plus chanceux)
-  - Email Address (Meilleure Adresse mail)
-  - Postal Code (Code postal) - for finding nearby bridge clubs
-  - Message (Message)
+### 💬 **Chat Communautaire Avancé**
+- **Chat flottant** positionné au bord de l'écran
+- **8 sujets spécialisés** : Discussion générale, Enchères, Jeu de la carte, etc.
+- **Chats privés** de 2-4 personnes avec invitations
+- **Statut en ligne** en temps réel
+- **Autocomplétion** pour la sélection de joueurs
 
-### 🗄️ Database Architecture
-Complete 9-table Supabase schema:
-- `contacts` - Contact form submissions
-- `students` - Student management
-- `lessons` - Course content organization
-- `student_progress` - Progress tracking
-- `subscriptions` - Subscription management
-- `group_sessions` - Live session scheduling
-- `session_participants` - Session enrollment
-- `reminders` - Automated follow-ups
-- `trustpilot_reviews` - Review integration
+### 📱 **Design Responsive**
+- **Interface moderne** avec Tailwind CSS
+- **Compatible mobile** et desktop
+- **Animations fluides** et transitions smooth
+- **Thème cohérent** vert professionnel
+- **Icônes Lucide** pour une UX optimale
 
-### 🎨 Design Features
-- Responsive mobile-first design
-- Professional green color scheme
-- Modern card-based layouts
-- Cross-browser compatibility
-- Accessibility optimized
+## 🚀 Déploiement
 
-## 🛠️ Technical Stack
+**Site en production :** https://yaznpfjd.manus.space
 
-- **Frontend**: React 18+ with Vite
-- **UI Components**: Custom components with Lucide icons
-- **Styling**: Tailwind CSS
-- **Backend**: Supabase (PostgreSQL + REST API)
-- **Authentication**: Supabase Auth with RLS policies
-- **Deployment**: Production-ready build system
+## 🛠️ Technologies
 
-## 📦 Installation
+- **Frontend :** React 19.1.0 + Vite
+- **Styling :** Tailwind CSS 4.1.7
+- **UI Components :** Radix UI + shadcn/ui
+- **Icons :** Lucide React
+- **Backend :** Supabase (Auth + Database)
+- **Deployment :** Manus Platform
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd bridge-website
-   ```
+## 📋 Installation
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
+```bash
+# Cloner le repository
+git clone https://github.com/LeKibbitz/BridgeFacile.git
+cd BridgeFacile
 
-3. **Configure Supabase**
-   - Update `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `src/App.jsx`
-   - Set up database schema using provided SQL files
+# Installer les dépendances
+pnpm install
 
-4. **Run development server**
-   ```bash
-   npm run dev
-   ```
+# Lancer en développement
+pnpm run dev
 
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
-
-## 🗄️ Database Setup
-
-### Supabase Configuration
-
-1. Create a new Supabase project
-2. Run the SQL commands to create all 9 tables
-3. Configure Row Level Security policies:
-
-```sql
--- Enable RLS
-ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
-
--- Allow anonymous contact form submissions
-CREATE POLICY "Allow anonymous inserts for contacts" ON public.contacts
-AS PERMISSIVE
-FOR INSERT
-TO anon
-WITH CHECK (true);
+# Build pour production
+pnpm run build
 ```
 
-### Required Tables
+## 🗄️ Base de Données
 
-All tables are automatically created with proper relationships and constraints. See the database schema documentation for complete details.
+### Tables Principales
 
-## 🔐 Security
+1. **`user_profiles`** - Profils utilisateurs avec informations bridge
+2. **`contacts`** - Formulaire de contact du site
+3. **`students`** - Gestion des étudiants inscrits
+4. **`lessons`** - Catalogue des cours par modules
+5. **`student_progress`** - Suivi individuel des progrès
+6. **`subscriptions`** - Gestion des abonnements
+7. **`group_sessions`** - Sessions de groupe en direct
+8. **`session_participants`** - Participants aux sessions
+9. **`reminders`** - Système de rappels automatisés
+10. **`trustpilot_reviews`** - Intégration des avis
+11. **`chat_messages`** - Messages du chat communautaire
+12. **`private_chats`** - Chats privés entre utilisateurs
+13. **`private_chat_participants`** - Participants aux chats privés
 
-- Row Level Security (RLS) enabled
-- Anonymous contact form submissions allowed
-- Secure API key configuration
-- Input validation and sanitization
-- CORS-enabled for cross-origin requests
+### Scripts SQL
 
-## 📱 Responsive Design
+- `authentication_schema.sql` - Schéma complet d'authentification
+- `individual_courses_schema.sql` - Extension pour cours particuliers
+- `add_columns.sql` - Migrations et ajouts de colonnes
 
-The platform is fully responsive and tested on:
-- Desktop browsers (Chrome, Firefox, Safari, Edge)
-- Mobile devices (iOS Safari, Android Chrome)
-- Tablet devices (iPad, Android tablets)
+## 📚 Documentation
 
-## 🎯 Business Features
+- [`Authentication_System_Database_Schema.md`](./Authentication_System_Database_Schema.md) - Documentation système d'authentification
+- [`Individual_Courses_Database_Schema.md`](./Individual_Courses_Database_Schema.md) - Documentation cours particuliers
+- [`BridgeFacile_Database_Schema.md`](./BridgeFacile_Database_Schema.md) - Schéma de base de données principal
 
-### Course Management
-- Dual course model (Live/Autonomous)
-- Flexible pricing structure
-- Progress tracking system
-- Student engagement tools
+## 🔧 Configuration
 
-### Student Acquisition
-- Professional contact form
-- Automatic database integration
-- Postal code for local club recommendations
-- Follow-up system foundation
+### Variables d'environnement Supabase
 
-### Review System
-- Trustpilot integration
-- Automated review requests
-- Reputation management tools
+```javascript
+const supabaseUrl = 'https://wfctinichbyfuwmxkebl.supabase.co'
+const supabaseAnonKey = 'your-anon-key-here'
+```
 
-## 📊 Analytics Ready
+### Fonctionnalités Supabase
 
-The platform includes comprehensive data collection for:
-- Student engagement metrics
-- Course completion rates
-- Contact form conversion tracking
-- Progress analytics
-- Business intelligence reporting
+- **Authentication** avec vérification email
+- **Row Level Security (RLS)** pour la sécurité
+- **Real-time subscriptions** pour le chat
+- **Triggers automatiques** pour la gestion des profils
 
-## 🚀 Deployment
+## 🎯 Fonctionnalités Clés
 
-### Production Deployment
-The site is deployed and accessible at: https://uvsgjklv.manus.space
+### Authentification
+- Inscription avec validation complète
+- Connexion sécurisée
+- Profils utilisateurs détaillés
+- Gestion des sessions
 
-### Custom Domain Setup
-To deploy to your own domain:
-1. Build the project: `npm run build`
-2. Upload the `dist/` folder to your hosting provider
-3. Configure DNS settings to point to your hosting provider
+### Chat Communautaire
+- Discussions par sujets bridge
+- Chats privés multi-utilisateurs
+- Statut en ligne temps réel
+- Interface moderne et intuitive
 
-## 📞 Contact Information
+### Cours Bridge
+- 3 formules adaptées à tous les besoins
+- Présentation interactive progressive
+- Suivi de progression personnalisé
+- Intégration avis clients
 
-- **Email**: thomas.joannes@bridgefacile.fr
-- **Phone**: +33 6 58 51 58 34
-- **WhatsApp/SMS**: Available
+### Design & UX
+- Interface responsive et moderne
+- Navigation intuitive
+- Animations fluides
+- Thème professionnel cohérent
 
-## 🤝 Contributing
+## 👨‍💻 Développement
 
-This project is ready for production use. For modifications or enhancements:
+### Structure du projet
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+```
+src/
+├── App.jsx              # Composant principal
+├── App.css              # Styles personnalisés
+├── components/
+│   └── ui/              # Composants UI réutilisables
+├── main.jsx             # Point d'entrée React
+└── index.css            # Styles globaux
+```
 
-## 📄 License
+### Composants principaux
 
-This project is proprietary software for BridgeFacile. All rights reserved.
+- `AuthModal` - Modal d'authentification
+- `AuthWidget` - Widget de connexion/inscription
+- `FloatingChat` - Chat communautaire flottant
+- `ContactModal` - Formulaire de contact
+- `ProgressBar` - Barre de progression des cours
 
-## 🎉 Acknowledgments
+## 🚀 Déploiement
 
-- Built with modern React best practices
-- Powered by Supabase for reliable backend services
-- Designed with user experience as the top priority
-- Optimized for performance and accessibility
+Le projet est configuré pour être déployé sur la plateforme Manus avec build automatique via Vite.
+
+```bash
+# Build de production
+pnpm run build
+
+# Prévisualisation locale
+pnpm run preview
+```
+
+## 📞 Contact
+
+**Thomas Joannès**
+- Email: thomas.joannes@bridgefacile.fr
+- Téléphone: +33 6 58 51 58 34
+- WhatsApp/SMS disponibles
+
+## 📄 Licence
+
+© 2025 BridgeFacile. Tous droits réservés.
 
 ---
 
-**BridgeFacile** - Making bridge learning accessible and enjoyable for everyone! 🃏
+**Développé avec ❤️ pour la communauté Bridge française** 🇫🇷
+
