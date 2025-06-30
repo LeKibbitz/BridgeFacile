@@ -430,6 +430,30 @@ function App() {
         'Support continu'
       ],
       color: 'green'
+    },
+    {
+      type: 'individual',
+      title: 'Cours Particuliers en Visio',
+      icon: Users,
+      duration: 'Programme sur-mesure',
+      price: 'Devis personnalisé',
+      description: 'Apprentissage ultra-personnalisé et accéléré avec professeur dédié',
+      features: [
+        'Cours 100% personnalisés selon vos besoins',
+        'Progression accélérée et intensive',
+        'Horaires totalement flexibles',
+        'Professeur dédié exclusivement',
+        'Contenu adapté à votre niveau',
+        'Suivi individuel approfondi',
+        'Objectifs définis ensemble'
+      ],
+      schedules: [
+        'Horaires à convenir ensemble',
+        'Fréquence selon vos disponibilités',
+        'Planning 100% flexible'
+      ],
+      color: 'purple',
+      isContactBased: true
     }
   ]
 
@@ -451,6 +475,12 @@ function App() {
       text: 'Grâce à ces cours, je participe maintenant à des tournois. Merci pour cette passion partagée !',
       rating: 5,
       course: 'Cours en Visio Live'
+    },
+    {
+      name: 'Jean-Claude Moreau',
+      text: 'Les cours particuliers m\'ont permis de progresser à mon rythme. Thomas s\'adapte parfaitement à mes besoins !',
+      rating: 5,
+      course: 'Cours Particuliers en Visio'
     }
   ]
 
@@ -598,17 +628,19 @@ function App() {
             <p className="text-xl text-gray-600">Choisissez la formule qui vous correspond</p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {courseFormulas.map((formula, index) => {
               const IconComponent = formula.icon
               return (
                 <Card key={index} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   <CardHeader className="text-center">
                     <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                      formula.color === 'blue' ? 'bg-blue-100' : 'bg-green-100'
+                      formula.color === 'blue' ? 'bg-blue-100' : 
+                      formula.color === 'green' ? 'bg-green-100' : 'bg-purple-100'
                     }`}>
                       <IconComponent className={`w-8 h-8 ${
-                        formula.color === 'blue' ? 'text-blue-600' : 'text-green-600'
+                        formula.color === 'blue' ? 'text-blue-600' : 
+                        formula.color === 'green' ? 'text-green-600' : 'text-purple-600'
                       }`} />
                     </div>
                     <CardTitle className="text-2xl mb-2">{formula.title}</CardTitle>
@@ -618,7 +650,8 @@ function App() {
                         {formula.duration}
                       </div>
                       <span className={`text-2xl font-bold ${
-                        formula.color === 'blue' ? 'text-blue-600' : 'text-green-600'
+                        formula.color === 'blue' ? 'text-blue-600' : 
+                        formula.color === 'green' ? 'text-green-600' : 'text-purple-600'
                       }`}>
                         {formula.price}
                       </span>
@@ -633,7 +666,8 @@ function App() {
                         {formula.features.map((feature, idx) => (
                           <li key={idx} className="flex items-start text-sm">
                             <CheckCircle className={`w-4 h-4 mr-2 mt-0.5 ${
-                              formula.color === 'blue' ? 'text-blue-600' : 'text-green-600'
+                              formula.color === 'blue' ? 'text-blue-600' : 
+                              formula.color === 'green' ? 'text-green-600' : 'text-purple-600'
                             }`} />
                             {feature}
                           </li>
@@ -643,7 +677,8 @@ function App() {
 
                     <div className="mb-6">
                       <h5 className="font-semibold text-gray-800 mb-2">
-                        {formula.type === 'live' ? 'Créneaux disponibles :' : 'Modalités :'}
+                        {formula.type === 'live' ? 'Créneaux disponibles :' : 
+                         formula.type === 'individual' ? 'Planning :' : 'Modalités :'}
                       </h5>
                       <ul className="space-y-1 text-sm text-gray-600">
                         {formula.schedules.map((schedule, idx) => (
@@ -659,11 +694,13 @@ function App() {
                       className={`w-full ${
                         formula.color === 'blue' 
                           ? 'bg-blue-600 hover:bg-blue-700' 
-                          : 'bg-green-600 hover:bg-green-700'
+                          : formula.color === 'green'
+                          ? 'bg-green-600 hover:bg-green-700'
+                          : 'bg-purple-600 hover:bg-purple-700'
                       }`}
                       onClick={() => setIsContactModalOpen(true)}
                     >
-                      Choisir cette formule
+                      {formula.isContactBased ? 'Me contacter pour un devis' : 'Choisir cette formule'}
                     </Button>
                   </CardContent>
                 </Card>
