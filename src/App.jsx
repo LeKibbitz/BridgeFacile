@@ -247,8 +247,8 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[70vh] overflow-y-auto relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">
@@ -709,8 +709,8 @@ function ContactModal({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" style={{zIndex: 99999, position: 'fixed'}}>
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[70vh] overflow-y-auto relative z-[100000]" style={{zIndex: 100000, position: 'relative'}}>
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold text-gray-800">Contactez-nous</h3>
           <button
