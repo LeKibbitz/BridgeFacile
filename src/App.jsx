@@ -247,8 +247,8 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[10000]">
         <div className="p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">
@@ -709,8 +709,8 @@ function ContactModal({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8 relative z-[10000]">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold text-gray-800">Contactez-nous</h3>
           <button
@@ -1045,7 +1045,7 @@ function FloatingChat() {
   }
 
   return (
-    <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+    <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-[8000]">
       {/* Collapsed State - Edge Button */}
       {!isExpanded && (
         <div 
