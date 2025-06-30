@@ -118,3 +118,71 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Styles pour les liens hypertexte dans les messages du ChatBot */
+.law-link {
+  @apply text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer;
+  @apply transition-colors duration-200;
+  @apply bg-transparent border-none p-0 m-0;
+}
+
+.law-link:hover {
+  @apply bg-blue-50 px-1 rounded;
+}
+
+/* Styles pour le contenu des lois */
+.prose h4 {
+  @apply font-semibold text-gray-900 mt-4 mb-2;
+}
+
+.prose p {
+  @apply mb-3 leading-relaxed;
+}
+
+.prose strong {
+  @apply font-semibold text-gray-900;
+}
+
+.prose em {
+  @apply italic text-gray-700;
+}
+
+/* Animation pour les transitions */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Styles pour les badges de navigation */
+.breadcrumb-item {
+  @apply flex items-center space-x-1;
+}
+
+/* Amélioration de l'apparence des messages */
+.message-content {
+  @apply leading-relaxed;
+}
+
+.message-content p {
+  @apply mb-2 last:mb-0;
+}
+
+/* Styles pour les résultats de recherche */
+.search-result {
+  @apply transition-all duration-200;
+}
+
+.search-result:hover {
+  @apply shadow-sm transform translate-y-[-1px];
+}
+

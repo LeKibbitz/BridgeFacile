@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
+import { ScrollArea } from '@/components/ui/scroll-area.jsx'
+import { Input } from '@/components/ui/input.jsx'
+import { Separator } from '@/components/ui/separator.jsx'
 import { 
   BookOpen, 
   Users, 
@@ -41,8 +44,13 @@ import {
   LogOut,
   UserCheck,
   Eye,
-  EyeOff
+  EyeOff,
+  Scale,
+  FileText,
+  ExternalLink,
+  ArrowLeft
 } from 'lucide-react'
+import { mockLaws, mockConversations, mockSearchResults } from './data/mockData.js'
 import './App.css'
 
 // Supabase configuration
@@ -1287,6 +1295,361 @@ function TrustpilotReview({ moduleTitle, onReviewComplete }) {
   )
 }
 
+// Assistant Arbitrage Component
+function ArbitrageSection() {
+  const [conversations, setConversations] = useState(mockConversations)
+  const [currentMessage, setCurrentMessage] = useState('')
+  const [selectedLaw, setSelectedLaw] = useState(null)
+  const [navigationHistory, setNavigationHistory] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [userMode, setUserMode] = useState('arbitre') // 'arbitre' ou 'joueur'
+  const messagesEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [conversations])
+
+  const handleSendMessage = () => {
+    if (!currentMessage.trim()) return
+
+    const newMessage = {
+      id: conversations.length + 1,
+      type: "user",
+      message: currentMessage,
+      timestamp: new Date()
+    }
+
+    setConversations([...conversations, newMessage])
+    setCurrentMessage('')
+
+    // Simulation d'une réponse automatique
+    setTimeout(() => {
+      const response = {
+        id: conversations.length + 2,
+        type: "assistant", 
+        message: generateMockResponse(currentMessage),
+        timestamp: new Date(),
+        references: ["loi-13", "loi-14"]
+      }
+      setConversations(prev => [...prev, response])
+    }, 1000)
+  }
+
+  const generateMockResponse = (query) => {
+    if (query.toLowerCase().includes('carte')) {
+      return "Cette question concerne les **Lois 13 et 14** relatives aux cartes manquantes ou en excès.\n\nPour une situation avec des cartes en trop, consultez la **Loi 13 section C**.\nPour des cartes manquantes, voir la **Loi 14**.\n\nSouhaitez-vous que je détaille une situation particulière ?"
+    }
+    return "Je peux vous aider avec cette question d'arbitrage. Pouvez-vous préciser la situation exacte ?"
+  }
+
+  const handleLawClick = (lawId) => {
+    const law = mockLaws[lawId]
+    if (law) {
+      // Ajouter à l'historique de navigation
+      if (selectedLaw) {
+        setNavigationHistory(prev => [...prev, selectedLaw])
+      }
+      setSelectedLaw(law)
+    }
+  }
+
+  const handleBackNavigation = () => {
+    if (navigationHistory.length > 0) {
+      const previousLaw = navigationHistory[navigationHistory.length - 1]
+      setNavigationHistory(prev => prev.slice(0, -1))
+      setSelectedLaw(previousLaw)
+    }
+  }
+
+  const handleHomeNavigation = () => {
+    setSelectedLaw(null)
+    setNavigationHistory([])
+  }
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return
+    setSearchResults(mockSearchResults.filter(result => 
+      result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      result.snippet.toLowerCase().includes(searchQuery.toLowerCase())
+    ))
+  }
+
+  const renderMessageWithLinks = (content, references = []) => {
+    let processedContent = content
+
+    // Remplacer les références par des liens cliquables
+    references.forEach(ref => {
+      const law = mockLaws[ref]
+      if (law) {
+        const pattern = new RegExp(`(Loi ${law.number}|Article ${law.number})`, 'gi')
+        processedContent = processedContent.replace(pattern, 
+          `<button class="law-link" data-law-id="${ref}">$1</button>`
+        )
+      }
+    })
+
+    return (
+      <div 
+        dangerouslySetInnerHTML={{ __html: processedContent }}
+        onClick={(e) => {
+          if (e.target.classList.contains('law-link')) {
+            const lawId = e.target.getAttribute('data-law-id')
+            handleLawClick(lawId)
+          }
+        }}
+      />
+    )
+  }
+
+  const renderBreadcrumb = () => {
+    if (!selectedLaw) return null
+
+    return (
+      <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+        <Button variant="ghost" size="sm" onClick={handleHomeNavigation}>
+          <Home className="w-4 h-4" />
+        </Button>
+        {navigationHistory.map((law, index) => (
+          <div key={law.id} className="flex items-center space-x-2">
+            <ChevronRight className="w-4 h-4" />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                setNavigationHistory(prev => prev.slice(0, index + 1))
+                setSelectedLaw(law)
+              }}
+            >
+              {law.type === 'loi' ? `Loi ${law.number}` : `Article ${law.number}`}
+            </Button>
+          </div>
+        ))}
+        <ChevronRight className="w-4 h-4" />
+        <span className="font-medium">
+          {selectedLaw.type === 'loi' ? `Loi ${selectedLaw.number}` : `Article ${selectedLaw.number}`}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <section id="arbitrage" className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <Scale className="w-8 h-8 text-blue-600" />
+            <h3 className="text-3xl font-bold text-gray-800">Assistant Arbitrage Bridge</h3>
+          </div>
+          <p className="text-xl text-gray-600">Votre assistant réglementaire intelligent</p>
+          <div className="flex items-center justify-center space-x-4 mt-6">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Mode :</span>
+              <Button
+                variant={userMode === 'arbitre' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUserMode('arbitre')}
+              >
+                <Users className="w-4 h-4 mr-1" />
+                Arbitre
+              </Button>
+              <Button
+                variant={userMode === 'joueur' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUserMode('joueur')}
+              >
+                <Users className="w-4 h-4 mr-1" />
+                Joueur
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          
+          {/* Chat Panel */}
+          <div className="lg:col-span-2">
+            <Card className="h-[600px] flex flex-col">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Conversation</span>
+                  <Badge variant="secondary">
+                    {userMode === 'arbitre' ? 'Mode Arbitre' : 'Mode Joueur'}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="flex-1 flex flex-col">
+                <ScrollArea className="flex-1 pr-4">
+                  <div className="space-y-4">
+                    {conversations.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                            msg.type === 'user'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          {msg.type === 'assistant' ? (
+                            renderMessageWithLinks(msg.message, msg.references)
+                          ) : (
+                            <p>{msg.message}</p>
+                          )}
+                          <div className="text-xs opacity-70 mt-1">
+                            {msg.timestamp.toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+                
+                <Separator className="my-4" />
+                
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Posez votre question d'arbitrage..."
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSendMessage}>
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Law Panel */}
+          <div className="space-y-6">
+            
+            {/* Search */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Search className="w-5 h-5" />
+                  <span>Recherche</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Rechercher une loi..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <Button onClick={handleSearch} size="sm">
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
+                
+                {searchResults.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {searchResults.map((result) => (
+                      <div
+                        key={result.id}
+                        className="p-2 border rounded cursor-pointer hover:bg-gray-50"
+                        onClick={() => handleLawClick(result.id)}
+                      >
+                        <div className="font-medium text-sm">{result.title}</div>
+                        <div className="text-xs text-gray-600">{result.snippet}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Law Display */}
+            <Card className="flex-1">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-2">
+                    <BookOpen className="w-5 h-5" />
+                    <span>Réglementation</span>
+                  </CardTitle>
+                  {selectedLaw && navigationHistory.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={handleBackNavigation}>
+                      <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                {selectedLaw ? (
+                  <div>
+                    {renderBreadcrumb()}
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <Badge variant="outline" className="mb-2">
+                          {selectedLaw.section}
+                        </Badge>
+                        <h3 className="text-lg font-bold">
+                          {selectedLaw.type === 'loi' ? 'Loi' : 'Article'} {selectedLaw.number} - {selectedLaw.title}
+                        </h3>
+                      </div>
+                      
+                      <div className="prose prose-sm max-w-none">
+                        {renderMessageWithLinks(selectedLaw.content, selectedLaw.references)}
+                      </div>
+                      
+                      {selectedLaw.references && selectedLaw.references.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Références croisées :</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedLaw.references.map((ref) => {
+                              const refLaw = mockLaws[ref]
+                              return refLaw ? (
+                                <Button
+                                  key={ref}
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleLawClick(ref)}
+                                  className="text-xs"
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1" />
+                                  {refLaw.type === 'loi' ? 'Loi' : 'Article'} {refLaw.number}
+                                </Button>
+                              ) : null
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Sélectionnez une loi ou un article pour l'afficher ici</p>
+                    <p className="text-sm mt-2">
+                      Cliquez sur les liens dans la conversation ou utilisez la recherche
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function App() {
   const [activeSlide, setActiveSlide] = useState(0)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
@@ -1474,6 +1837,7 @@ function App() {
               <a href="#accueil" className="text-gray-700 hover:text-green-600 transition-colors">Accueil</a>
               <a href="#cours" className="text-gray-700 hover:text-green-600 transition-colors">Cours</a>
               <a href="#presentation" className="text-gray-700 hover:text-green-600 transition-colors">Présentation</a>
+              <a href="#arbitrage" className="text-gray-700 hover:text-green-600 transition-colors">Assistant Arbitrage</a>
             </nav>
             <div className="flex items-center space-x-4">
               <AuthWidget />
@@ -1853,6 +2217,9 @@ function App() {
           </div>
         </div>
       </section>
+
+      {/* Assistant Arbitrage Section */}
+      <ArbitrageSection />
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-12">
