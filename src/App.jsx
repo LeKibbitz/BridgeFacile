@@ -461,19 +461,6 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
                 mode === 'signup' ? 'S\'inscrire' : 'Se connecter'
               )}
             </Button>
-
-            {/* Switch Mode */}
-            {mode === 'signin' && (
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={onSwitchMode}
-                  className="text-sm text-green-600 hover:text-green-700 transition-colors"
-                >
-                  Pas encore inscrit ? S'inscrire
-                </button>
-              </div>
-            )}
           </form>
         </div>
       </div>
@@ -587,13 +574,21 @@ function AuthWidget() {
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center space-x-2">
       <button
         onClick={() => openAuthModal('signin')}
         className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
       >
         <LogIn className="w-4 h-4" />
         <span>Connexion</span>
+      </button>
+      
+      <button
+        onClick={() => openAuthModal('signup')}
+        className="flex items-center space-x-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md transition-colors"
+      >
+        <UserPlus className="w-4 h-4" />
+        <span>Inscription</span>
       </button>
 
       <AuthModal
