@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
@@ -222,22 +222,24 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
     }
   }
 
-  // Handle Escape key
+  // Handle Escape key for AuthModal
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
         onClose()
       }
     }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape, { capture: true })
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleEscape, { capture: true })
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, onClose])
@@ -245,22 +247,22 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] overflow-y-auto my-8">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto mt-8 mb-8">
+        <div className="p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-gray-900">
               {mode === 'signup' ? 'Inscription' : 'Connexion'}
             </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -682,22 +684,24 @@ function ContactModal({ isOpen, onClose }) {
     }
   }
 
-  // Handle Escape key
+  // Handle Escape key for ContactModal
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
         onClose()
       }
     }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape, { capture: true })
       // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden'
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleEscape, { capture: true })
       document.body.style.overflow = 'unset'
     }
   }, [isOpen, onClose])
@@ -705,9 +709,9 @@ function ContactModal({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] overflow-y-auto my-8">
-        <div className="flex justify-between items-center p-6 border-b">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto mt-8 mb-8">
+        <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-semibold text-gray-800">Contactez-nous</h3>
           <button
             onClick={onClose}
