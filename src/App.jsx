@@ -441,18 +441,17 @@ function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
             </Button>
 
             {/* Switch Mode */}
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={onSwitchMode}
-                className="text-sm text-green-600 hover:text-green-700 transition-colors"
-              >
-                {mode === 'signup' 
-                  ? 'Déjà un compte ? Se connecter' 
-                  : 'Pas de compte ? S\'inscrire'
-                }
-              </button>
-            </div>
+            {mode === 'signin' && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={onSwitchMode}
+                  className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                >
+                  Pas encore inscrit ? S'inscrire
+                </button>
+              </div>
+            )}
           </form>
         </div>
       </div>
@@ -566,21 +565,13 @@ function AuthWidget() {
   }
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center">
       <button
         onClick={() => openAuthModal('signin')}
-        className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors"
+        className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors"
       >
         <LogIn className="w-4 h-4" />
-        <span className="text-sm">Connexion</span>
-      </button>
-      <span className="text-gray-300">|</span>
-      <button
-        onClick={() => openAuthModal('signup')}
-        className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md transition-colors"
-      >
-        <UserPlus className="w-4 h-4" />
-        <span className="text-sm">Inscription</span>
+        <span>Connexion</span>
       </button>
 
       <AuthModal
