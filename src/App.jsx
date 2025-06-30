@@ -301,20 +301,23 @@ function ProgressBar({ progress, total }) {
 // Floating Chat Component
 function FloatingChat() {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [selectedAudience, setSelectedAudience] = useState('Tout le monde')
   const [messages, setMessages] = useState([
     {
       id: 1,
-      user: 'Thomas',
-      category: 'Professeur',
-      message: 'Bienvenue ! N\'hésitez pas à poser vos questions.',
+      user: 'Marie_D',
+      category: 'Cours Live',
+      audience: 'Tout le monde',
+      message: 'Bonjour tout le monde ! Quelqu\'un pour réviser les enchères ?',
       timestamp: new Date(Date.now() - 300000),
-      isAdmin: true
+      isAdmin: false
     },
     {
       id: 2,
-      user: 'Marie_D',
-      category: 'Cours Live',
-      message: 'Merci pour le cours d\'aujourd\'hui !',
+      user: 'Pierre_M',
+      category: 'Cours Autonome',
+      audience: 'Tout le monde',
+      message: 'Salut ! Moi je suis partant pour réviser 😊',
       timestamp: new Date(Date.now() - 120000),
       isAdmin: false
     }
@@ -333,12 +336,22 @@ function FloatingChat() {
     'Cours Particulier'
   ]
 
+  const audienceOptions = [
+    'Tout le monde',
+    'Prospects uniquement',
+    'Cours Live - Débutant',
+    'Cours Live - Intermédiaire',
+    'Cours Autonome',
+    'Cours Particulier'
+  ]
+
   const handleSendMessage = () => {
     if (newMessage.trim()) {
       const message = {
         id: messages.length + 1,
         user: userInfo.pseudo,
         category: userInfo.category,
+        audience: selectedAudience,
         message: newMessage,
         timestamp: new Date(),
         isAdmin: false
@@ -363,41 +376,53 @@ function FloatingChat() {
     return 'bg-gray-100 text-gray-800'
   }
 
+  const getFilteredMessages = () => {
+    if (selectedAudience === 'Tout le monde') {
+      return messages.filter(msg => msg.audience === 'Tout le monde')
+    }
+    return messages.filter(msg => 
+      msg.audience === selectedAudience || 
+      msg.audience === 'Tout le monde' ||
+      msg.category === selectedAudience
+    )
+  }
+
   return (
-    <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50">
-      {/* Collapsed State */}
+    <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+      {/* Collapsed State - Edge Button */}
       {!isExpanded && (
         <div 
           onClick={() => setIsExpanded(true)}
-          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-110"
+          className="bg-gray-800 hover:bg-gray-700 text-white rounded-l-full shadow-lg cursor-pointer transition-all duration-300 hover:scale-105 flex items-center justify-center"
+          style={{ width: '60px', height: '60px', marginRight: '-15px' }}
         >
-          <MessageCircle className="w-6 h-6" />
-          <div className="absolute -left-20 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-            Chat Support
+          <MessageCircle className="w-6 h-6 text-purple-400" />
+          <div className="absolute -left-16 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity">
+            Chat
           </div>
         </div>
       )}
 
       {/* Expanded State */}
       {isExpanded && (
-        <div className="bg-white rounded-lg shadow-2xl w-80 h-96 flex flex-col border border-gray-200 animate-in slide-in-from-right duration-300">
+        <div className="bg-white rounded-l-lg shadow-2xl w-80 h-96 flex flex-col border border-gray-200 animate-in slide-in-from-right duration-300" style={{ marginRight: '-1px' }}>
           {/* Header */}
-          <div className="bg-green-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+          <div className="bg-gray-800 text-white p-4 rounded-tl-lg flex justify-between items-center">
             <div>
-              <h3 className="font-semibold">Chat BridgeFacile</h3>
-              <p className="text-xs text-green-100">Support en ligne</p>
+              <h3 className="font-semibold">Chat Communauté</h3>
+              <p className="text-xs text-gray-300">Échangez entre élèves</p>
             </div>
             <button 
               onClick={() => setIsExpanded(false)}
-              className="hover:bg-green-700 p-1 rounded"
+              className="hover:bg-gray-700 p-1 rounded"
             >
               <Minimize2 className="w-4 h-4" />
             </button>
           </div>
 
-          {/* User Info */}
-          <div className="p-3 bg-gray-50 border-b">
-            <div className="flex items-center space-x-2 mb-2">
+          {/* User Info & Audience Selection */}
+          <div className="p-3 bg-gray-50 border-b space-y-2">
+            <div className="flex items-center space-x-2">
               <User className="w-4 h-4 text-gray-600" />
               <input
                 type="text"
@@ -416,32 +441,53 @@ function FloatingChat() {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-600">Audience:</span>
+              <select
+                value={selectedAudience}
+                onChange={(e) => setSelectedAudience(e.target.value)}
+                className="text-xs border rounded px-2 py-1 flex-1"
+              >
+                {audienceOptions.map(audience => (
+                  <option key={audience} value={audience}>{audience}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {messages.map(msg => (
-              <div key={msg.id} className={`${msg.isAdmin ? 'text-right' : 'text-left'}`}>
-                <div className={`inline-block max-w-[80%] p-2 rounded-lg ${
-                  msg.isAdmin 
-                    ? 'bg-green-100 text-green-900' 
-                    : 'bg-gray-100 text-gray-900'
-                }`}>
+            {getFilteredMessages().map(msg => (
+              <div key={msg.id} className="text-left">
+                <div className="inline-block max-w-[90%] p-2 rounded-lg bg-gray-100 text-gray-900">
                   <div className="flex items-center space-x-1 mb-1">
                     <span className="font-semibold text-xs">{msg.user}</span>
                     <Badge className={`text-xs px-1 py-0 ${getCategoryColor(msg.category)}`}>
                       {msg.category}
                     </Badge>
+                    {msg.audience !== 'Tout le monde' && (
+                      <Badge className="text-xs px-1 py-0 bg-orange-100 text-orange-800">
+                        {msg.audience}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm">{msg.message}</p>
                   <p className="text-xs text-gray-500 mt-1">{formatTime(msg.timestamp)}</p>
                 </div>
               </div>
             ))}
+            {getFilteredMessages().length === 0 && (
+              <div className="text-center text-gray-500 text-sm">
+                Aucun message pour cette audience
+              </div>
+            )}
           </div>
 
           {/* Input */}
           <div className="p-3 border-t bg-gray-50">
+            <div className="text-xs text-gray-600 mb-2">
+              Envoyer à: <span className="font-semibold">{selectedAudience}</span>
+            </div>
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -449,12 +495,12 @@ function FloatingChat() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 placeholder="Tapez votre message..."
-                className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
               <Button 
                 onClick={handleSendMessage}
                 size="sm"
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-purple-600 hover:bg-purple-700"
               >
                 <Send className="w-4 h-4" />
               </Button>
