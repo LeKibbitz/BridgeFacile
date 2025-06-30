@@ -30,7 +30,12 @@ import {
   Send,
   Minimize2,
   Maximize2,
-  User
+  User,
+  Plus,
+  Check,
+  Hash,
+  UserPlus,
+  Search
 } from 'lucide-react'
 import './App.css'
 
@@ -301,27 +306,45 @@ function ProgressBar({ progress, total }) {
 // Floating Chat Component
 function FloatingChat() {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [selectedAudience, setSelectedAudience] = useState('Tout le monde')
+  const [selectedTopic, setSelectedTopic] = useState('Discussion générale')
+  const [chatMode, setChatMode] = useState('public') // 'public' or 'private'
+  const [selectedPlayers, setSelectedPlayers] = useState([])
+  const [playerSearch, setPlayerSearch] = useState('')
+  const [isSelectingPlayers, setIsSelectingPlayers] = useState(false)
+  
   const [messages, setMessages] = useState([
     {
       id: 1,
       user: 'Marie_D',
       category: 'Cours Live',
-      audience: 'Tout le monde',
+      topic: 'Discussion générale',
+      chatType: 'public',
       message: 'Bonjour tout le monde ! Quelqu\'un pour réviser les enchères ?',
       timestamp: new Date(Date.now() - 300000),
-      isAdmin: false
+      isOnline: true
     },
     {
       id: 2,
       user: 'Pierre_M',
       category: 'Cours Autonome',
-      audience: 'Tout le monde',
-      message: 'Salut ! Moi je suis partant pour réviser 😊',
+      topic: 'Enchères',
+      chatType: 'public',
+      message: 'J\'ai du mal avec les enchères de barrage, des conseils ?',
       timestamp: new Date(Date.now() - 120000),
-      isAdmin: false
+      isOnline: false
+    },
+    {
+      id: 3,
+      user: 'Sophie_L',
+      category: 'Cours Particulier',
+      topic: 'Recherche de partenaire',
+      chatType: 'public',
+      message: 'Cherche partenaire niveau intermédiaire pour tournoi dimanche !',
+      timestamp: new Date(Date.now() - 60000),
+      isOnline: true
     }
   ])
+  
   const [newMessage, setNewMessage] = useState('')
   const [userInfo, setUserInfo] = useState({
     pseudo: 'Visiteur',
@@ -336,13 +359,25 @@ function FloatingChat() {
     'Cours Particulier'
   ]
 
-  const audienceOptions = [
-    'Tout le monde',
-    'Prospects uniquement',
-    'Cours Live - Débutant',
-    'Cours Live - Intermédiaire',
-    'Cours Autonome',
-    'Cours Particulier'
+  const bridgeTopics = [
+    'Discussion générale',
+    'Enchères',
+    'Jeu de la carte',
+    'Recherche de partenaire',
+    'Organisation de partie',
+    'Conventions',
+    'Tournois',
+    'Questions débutants'
+  ]
+
+  // Simulated online players for autocomplete
+  const allPlayers = [
+    { name: 'Marie_D', category: 'Cours Live', isOnline: true },
+    { name: 'Pierre_M', category: 'Cours Autonome', isOnline: false },
+    { name: 'Sophie_L', category: 'Cours Particulier', isOnline: true },
+    { name: 'Jean_C', category: 'Cours Live', isOnline: true },
+    { name: 'Anne_B', category: 'Cours Autonome', isOnline: false },
+    { name: 'Thomas_J', category: 'Professeur', isOnline: true }
   ]
 
   const handleSendMessage = () => {
@@ -351,10 +386,12 @@ function FloatingChat() {
         id: messages.length + 1,
         user: userInfo.pseudo,
         category: userInfo.category,
-        audience: selectedAudience,
+        topic: selectedTopic,
+        chatType: chatMode,
+        participants: chatMode === 'private' ? selectedPlayers.map(p => p.name) : [],
         message: newMessage,
         timestamp: new Date(),
-        isAdmin: false
+        isOnline: true
       }
       setMessages([...messages, message])
       setNewMessage('')
@@ -377,14 +414,45 @@ function FloatingChat() {
   }
 
   const getFilteredMessages = () => {
-    if (selectedAudience === 'Tout le monde') {
-      return messages.filter(msg => msg.audience === 'Tout le monde')
+    if (chatMode === 'private') {
+      return messages.filter(msg => 
+        msg.chatType === 'private' && 
+        msg.participants && 
+        selectedPlayers.every(p => msg.participants.includes(p.name))
+      )
     }
     return messages.filter(msg => 
-      msg.audience === selectedAudience || 
-      msg.audience === 'Tout le monde' ||
-      msg.category === selectedAudience
+      msg.topic === selectedTopic && msg.chatType === 'public'
     )
+  }
+
+  const getFilteredPlayers = () => {
+    return allPlayers.filter(player => 
+      player.name.toLowerCase().includes(playerSearch.toLowerCase()) &&
+      !selectedPlayers.find(p => p.name === player.name)
+    )
+  }
+
+  const addPlayer = (player) => {
+    if (selectedPlayers.length < 4) {
+      setSelectedPlayers([...selectedPlayers, player])
+      setPlayerSearch('')
+    }
+  }
+
+  const removePlayer = (playerName) => {
+    setSelectedPlayers(selectedPlayers.filter(p => p.name !== playerName))
+  }
+
+  const startPrivateChat = () => {
+    setChatMode('private')
+    setIsSelectingPlayers(false)
+  }
+
+  const backToPublic = () => {
+    setChatMode('public')
+    setSelectedPlayers([])
+    setIsSelectingPlayers(false)
   }
 
   return (
@@ -409,8 +477,15 @@ function FloatingChat() {
           {/* Header */}
           <div className="bg-gray-800 text-white p-4 rounded-tl-lg flex justify-between items-center">
             <div>
-              <h3 className="font-semibold">Chat Communauté</h3>
-              <p className="text-xs text-gray-300">Échangez entre élèves</p>
+              <h3 className="font-semibold">
+                {chatMode === 'private' ? 'Chat Privé' : 'Chat Bridge'}
+              </h3>
+              <p className="text-xs text-gray-300">
+                {chatMode === 'private' 
+                  ? `${selectedPlayers.length + 1} participant${selectedPlayers.length > 0 ? 's' : ''}`
+                  : selectedTopic
+                }
+              </p>
             </div>
             <button 
               onClick={() => setIsExpanded(false)}
@@ -420,18 +495,8 @@ function FloatingChat() {
             </button>
           </div>
 
-          {/* User Info & Audience Selection */}
+          {/* User Category & Topic/Mode Selection */}
           <div className="p-3 bg-gray-50 border-b space-y-2">
-            <div className="flex items-center space-x-2">
-              <User className="w-4 h-4 text-gray-600" />
-              <input
-                type="text"
-                value={userInfo.pseudo}
-                onChange={(e) => setUserInfo({...userInfo, pseudo: e.target.value})}
-                className="text-sm border rounded px-2 py-1 flex-1"
-                placeholder="Votre pseudo"
-              />
-            </div>
             <select
               value={userInfo.category}
               onChange={(e) => setUserInfo({...userInfo, category: e.target.value})}
@@ -441,19 +506,108 @@ function FloatingChat() {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-600">Audience:</span>
-              <select
-                value={selectedAudience}
-                onChange={(e) => setSelectedAudience(e.target.value)}
-                className="text-xs border rounded px-2 py-1 flex-1"
+
+            {/* Topic Selection for Public Chat */}
+            {chatMode === 'public' && (
+              <div className="flex items-center space-x-2">
+                <Hash className="w-4 h-4 text-gray-600" />
+                <select
+                  value={selectedTopic}
+                  onChange={(e) => setSelectedTopic(e.target.value)}
+                  className="text-xs border rounded px-2 py-1 flex-1"
+                >
+                  {bridgeTopics.map(topic => (
+                    <option key={topic} value={topic}>{topic}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Private Chat Controls */}
+            {chatMode === 'public' && (
+              <button
+                onClick={() => setIsSelectingPlayers(true)}
+                className="w-full text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-2 py-1 rounded flex items-center justify-center space-x-1"
               >
-                {audienceOptions.map(audience => (
-                  <option key={audience} value={audience}>{audience}</option>
-                ))}
-              </select>
-            </div>
+                <UserPlus className="w-3 h-3" />
+                <span>Chat privé</span>
+              </button>
+            )}
+
+            {chatMode === 'private' && (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-1">
+                  {selectedPlayers.map(player => (
+                    <div key={player.name} className="flex items-center bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
+                      <div className={`w-2 h-2 rounded-full mr-1 ${player.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span>{player.name}</span>
+                      <button onClick={() => removePlayer(player.name)} className="ml-1 hover:text-purple-600">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={backToPublic}
+                  className="w-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 py-1 rounded"
+                >
+                  Retour public
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* Player Selection Modal */}
+          {isSelectingPlayers && (
+            <div className="p-3 bg-blue-50 border-b space-y-2">
+              <div className="flex items-center space-x-2">
+                <Search className="w-4 h-4 text-gray-600" />
+                <input
+                  type="text"
+                  value={playerSearch}
+                  onChange={(e) => setPlayerSearch(e.target.value)}
+                  placeholder="Chercher un joueur..."
+                  className="text-xs border rounded px-2 py-1 flex-1"
+                />
+              </div>
+              
+              <div className="max-h-20 overflow-y-auto space-y-1">
+                {getFilteredPlayers().slice(0, 5).map(player => (
+                  <div 
+                    key={player.name}
+                    onClick={() => addPlayer(player)}
+                    className="flex items-center justify-between p-1 hover:bg-blue-100 rounded cursor-pointer text-xs"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 rounded-full ${player.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span>{player.name}</span>
+                      <Badge className={`text-xs px-1 py-0 ${getCategoryColor(player.category)}`}>
+                        {player.category}
+                      </Badge>
+                    </div>
+                    <Plus className="w-3 h-3 text-blue-600" />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setIsSelectingPlayers(false)}
+                  className="flex-1 text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={startPrivateChat}
+                  disabled={selectedPlayers.length === 0}
+                  className="flex-1 text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded disabled:opacity-50 flex items-center justify-center space-x-1"
+                >
+                  <Check className="w-3 h-3" />
+                  <span>Valider</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
@@ -461,15 +615,11 @@ function FloatingChat() {
               <div key={msg.id} className="text-left">
                 <div className="inline-block max-w-[90%] p-2 rounded-lg bg-gray-100 text-gray-900">
                   <div className="flex items-center space-x-1 mb-1">
+                    <div className={`w-2 h-2 rounded-full ${msg.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
                     <span className="font-semibold text-xs">{msg.user}</span>
                     <Badge className={`text-xs px-1 py-0 ${getCategoryColor(msg.category)}`}>
                       {msg.category}
                     </Badge>
-                    {msg.audience !== 'Tout le monde' && (
-                      <Badge className="text-xs px-1 py-0 bg-orange-100 text-orange-800">
-                        {msg.audience}
-                      </Badge>
-                    )}
                   </div>
                   <p className="text-sm">{msg.message}</p>
                   <p className="text-xs text-gray-500 mt-1">{formatTime(msg.timestamp)}</p>
@@ -478,7 +628,10 @@ function FloatingChat() {
             ))}
             {getFilteredMessages().length === 0 && (
               <div className="text-center text-gray-500 text-sm">
-                Aucun message pour cette audience
+                {chatMode === 'private' 
+                  ? 'Aucun message dans ce chat privé'
+                  : `Aucun message sur ${selectedTopic}`
+                }
               </div>
             )}
           </div>
@@ -486,7 +639,10 @@ function FloatingChat() {
           {/* Input */}
           <div className="p-3 border-t bg-gray-50">
             <div className="text-xs text-gray-600 mb-2">
-              Envoyer à: <span className="font-semibold">{selectedAudience}</span>
+              {chatMode === 'private' 
+                ? `Chat avec: ${selectedPlayers.map(p => p.name).join(', ')}`
+                : `Sujet: ${selectedTopic}`
+              }
             </div>
             <div className="flex space-x-2">
               <input
