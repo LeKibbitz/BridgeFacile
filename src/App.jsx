@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
@@ -35,9 +36,562 @@ import {
   Check,
   Hash,
   UserPlus,
-  Search
+  Search,
+  LogIn,
+  LogOut,
+  UserCheck,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import './App.css'
+
+// Supabase configuration
+const supabaseUrl = 'https://wfctinichbyfuwmxkebl.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmY3RpbmljaGJ5ZnV3bXhrZWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMzA4MTYsImV4cCI6MjA2NjgwNjgxNn0.dol16RsNz7_hjgEhVlSM0l0p7U6sW3GYGueBx9AFOLw'
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Authentication Modal Component
+function AuthModal({ isOpen, onClose, mode, onSwitchMode }) {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    first_name: '',
+    last_name: '',
+    pseudo: '',
+    phone_number: '',
+    address: '',
+    bridge_license_number: ''
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('') // 'success' or 'error'
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validateForm = () => {
+    if (!validateEmail(formData.email)) {
+      setMessage('Veuillez entrer une adresse email valide')
+      setMessageType('error')
+      return false
+    }
+
+    if (formData.password.length < 6) {
+      setMessage('Le mot de passe doit contenir au moins 6 caractères')
+      setMessageType('error')
+      return false
+    }
+
+    if (mode === 'signup') {
+      if (formData.password !== formData.confirmPassword) {
+        setMessage('Les mots de passe ne correspondent pas')
+        setMessageType('error')
+        return false
+      }
+
+      if (!formData.first_name.trim() || !formData.last_name.trim()) {
+        setMessage('Le prénom et le nom sont obligatoires')
+        setMessageType('error')
+        return false
+      }
+
+      if (!formData.pseudo.trim()) {
+        setMessage('Le pseudo est obligatoire')
+        setMessageType('error')
+        return false
+      }
+
+      if (formData.pseudo.length < 3) {
+        setMessage('Le pseudo doit contenir au moins 3 caractères')
+        setMessageType('error')
+        return false
+      }
+
+      if (formData.bridge_license_number && !/^[0-9]{6,8}$/.test(formData.bridge_license_number)) {
+        setMessage('Le numéro de licence doit contenir 6 à 8 chiffres')
+        setMessageType('error')
+        return false
+      }
+
+      if (formData.phone_number && !/^(\+33|0)[1-9]([0-9]{8})$/.test(formData.phone_number)) {
+        setMessage('Veuillez entrer un numéro de téléphone français valide')
+        setMessageType('error')
+        return false
+      }
+    }
+
+    return true
+  }
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            pseudo: formData.pseudo,
+            phone_number: formData.phone_number,
+            address: formData.address,
+            bridge_license_number: formData.bridge_license_number
+          }
+        }
+      })
+
+      if (error) {
+        setMessage(error.message)
+        setMessageType('error')
+      } else {
+        setMessage('Inscription réussie ! Vérifiez votre email pour confirmer votre compte.')
+        setMessageType('success')
+        // Reset form
+        setFormData({
+          email: '',
+          password: '',
+          confirmPassword: '',
+          first_name: '',
+          last_name: '',
+          pseudo: '',
+          phone_number: '',
+          address: '',
+          bridge_license_number: ''
+        })
+      }
+    } catch (error) {
+      setMessage('Erreur lors de l\'inscription')
+      setMessageType('error')
+    }
+
+    setLoading(false)
+  }
+
+  const handleSignIn = async () => {
+    if (!validateForm()) return
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      })
+
+      if (error) {
+        setMessage(error.message)
+        setMessageType('error')
+      } else {
+        setMessage('Connexion réussie !')
+        setMessageType('success')
+        onClose()
+      }
+    } catch (error) {
+      setMessage('Erreur lors de la connexion')
+      setMessageType('error')
+    }
+
+    setLoading(false)
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (mode === 'signup') {
+      handleSignUp()
+    } else {
+      handleSignIn()
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {mode === 'signup' ? 'Inscription' : 'Connexion'}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="votre@email.com"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mot de passe *
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password (Sign Up only) */}
+            {mode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmer le mot de passe *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Sign Up Fields */}
+            {mode === 'signup' && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prénom *
+                    </label>
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Jean"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nom *
+                    </label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Dupont"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pseudo *
+                  </label>
+                  <input
+                    type="text"
+                    name="pseudo"
+                    value={formData.pseudo}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="jean_bridge"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Numéro de téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone_number"
+                    value={formData.phone_number}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="0123456789"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Adresse
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows="2"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="123 Rue de la Paix, 75001 Paris"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Numéro de licence FFB
+                  </label>
+                  <input
+                    type="text"
+                    name="bridge_license_number"
+                    value={formData.bridge_license_number}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="123456"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Optionnel - 6 à 8 chiffres
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Message */}
+            {message && (
+              <div className={`p-3 rounded-md text-sm ${
+                messageType === 'success' 
+                  ? 'bg-green-50 text-green-800 border border-green-200' 
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                {message}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition-colors"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {mode === 'signup' ? 'Inscription...' : 'Connexion...'}
+                </div>
+              ) : (
+                mode === 'signup' ? 'S\'inscrire' : 'Se connecter'
+              )}
+            </Button>
+
+            {/* Switch Mode */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={onSwitchMode}
+                className="text-sm text-green-600 hover:text-green-700 transition-colors"
+              >
+                {mode === 'signup' 
+                  ? 'Déjà un compte ? Se connecter' 
+                  : 'Pas de compte ? S\'inscrire'
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Authentication Widget Component
+function AuthWidget() {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState('signin') // 'signin' or 'signup'
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+        
+        if (event === 'SIGNED_IN') {
+          // Call function to update last login
+          try {
+            await supabase.rpc('update_last_login')
+          } catch (error) {
+            console.log('Error updating last login:', error)
+          }
+        }
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setShowUserMenu(false)
+  }
+
+  const openAuthModal = (mode) => {
+    setAuthMode(mode)
+    setShowAuthModal(true)
+  }
+
+  const switchAuthMode = () => {
+    setAuthMode(authMode === 'signin' ? 'signup' : 'signin')
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+      </div>
+    )
+  }
+
+  if (user) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowUserMenu(!showUserMenu)}
+          className="flex items-center space-x-2 bg-green-100 hover:bg-green-200 text-green-800 px-3 py-2 rounded-md transition-colors"
+        >
+          <UserCheck className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            {user.user_metadata?.pseudo || user.email?.split('@')[0]}
+          </span>
+        </button>
+
+        {showUserMenu && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+            <div className="py-1">
+              <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                <div className="font-medium">{user.user_metadata?.first_name} {user.user_metadata?.last_name}</div>
+                <div className="text-gray-500">{user.email}</div>
+              </div>
+              <button
+                onClick={() => {/* TODO: Open profile modal */}}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Mon profil
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Se déconnecter
+              </button>
+            </div>
+          </div>
+        )}
+
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          mode={authMode}
+          onSwitchMode={switchAuthMode}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center space-x-2">
+      <button
+        onClick={() => openAuthModal('signin')}
+        className="flex items-center space-x-1 text-gray-600 hover:text-green-600 transition-colors"
+      >
+        <LogIn className="w-4 h-4" />
+        <span className="text-sm">Connexion</span>
+      </button>
+      <span className="text-gray-300">|</span>
+      <button
+        onClick={() => openAuthModal('signup')}
+        className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-md transition-colors"
+      >
+        <UserPlus className="w-4 h-4" />
+        <span className="text-sm">Inscription</span>
+      </button>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        mode={authMode}
+        onSwitchMode={switchAuthMode}
+      />
+    </div>
+  )
+}
 
 // Contact Modal Component
 function ContactModal({ isOpen, onClose }) {
@@ -891,13 +1445,16 @@ function App() {
               <a href="#cours" className="text-gray-700 hover:text-green-600 transition-colors">Cours</a>
               <a href="#presentation" className="text-gray-700 hover:text-green-600 transition-colors">Présentation</a>
             </nav>
-            <Button 
-              onClick={() => setIsContactModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Contact
-            </Button>
+            <div className="flex items-center space-x-4">
+              <AuthWidget />
+              <Button 
+                onClick={() => setIsContactModalOpen(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Contact
+              </Button>
+            </div>
           </div>
         </div>
       </header>
